@@ -1,0 +1,26 @@
+body {
+  background: #333;
+}
+
+h1 em {
+  color: white;
+}
+
+span {
+  color: white;
+}
+
+.minus-button, .plus-button, .input-value {
+  padding: 5px;
+  margin: 5px;
+  font-size: 2.5em;
+}
+
+.duration-input {
+  color: white;
+  display: inline-block;
+}
+
+.toggle-container {
+  padding: 25%;  
+}

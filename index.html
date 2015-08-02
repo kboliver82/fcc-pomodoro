@@ -7,12 +7,25 @@
 <body>
 <div class="container" id="mainContainer">
   <h1 class='text-primary text-center'><em>Pomodoro</em></h1>
-  <form id="timerForm" class="text-center">
-    <label for="break">Break</label>
-    <input type="number" name="break" id="break" min="0" value="5" />
-    <label for="session">Session</label>
-    <input type="number" name="session" id="session" min="0" value="15" />
-  </form>
+  <div class="row align-center">
+    <div class="col-xs-3"></div>
+    <div class="duration-input col-xs-3">
+      <h3 class="input-label text-center">BREAK</h3>
+      <span class="toggle-container">
+        <span id="break-minus" class="minus-button">-</span>
+        <span id="break" class="input-value">5</span>
+        <span id="break-plus" class="plus-button">+</span>
+      </span>
+    </div>
+    <div class="duration-input col-xs-3">
+      <h3 class="input-label text-center">SESSION</h3>
+      <span class="toggle-container">
+        <span id="session-minus" class="minus-button">-</span>
+        <span id="session" class="input-value">15</span>
+        <span id="session-plus" class="plus-button">+</span>
+      </span>
+    </div>
+  </div>
   <br/>
   <div id="countdown">
   </div>
