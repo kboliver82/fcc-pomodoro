@@ -10,6 +10,16 @@ span {
   color: white;
 }
 
+a {
+  color: white;
+}
+
+a:hover, a:visited, a:focus {
+  text-decoration: none;
+  color: white;
+}
+
+
 .minus-button, .plus-button, .input-value {
   padding: 5px;
   margin: 5px;
