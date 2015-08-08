@@ -1,39 +1,9 @@
 
-function updateCountdown(toggleContainer, countdownContainer, value) {
+function updateCountdown(toggleContainer, countdownContainer, duration) {
     // find the .countdown-container that has the same data-duration-type (session or break)
     var durationType = toggleContainer.data('duration-type');
     var ctDown = $(countdownContainer).closest('[data-duration-type="' + durationType + '"]').find('#countdown');
-    ctDown.text(value);
-}
-
-function toTimestamp(val) {
-    return {
-        mins: parseInt(val,10),
-        secs: 0
-    };
-}
-
-function toTimestampString(timestamp) {
-    var str = timestamp.mins + ":";
-    str += (timestamp.secs < 10 ? '0' : '') + timestamp.secs;
-
-    return str;
-}
-
-function decrementTimestamp(timestamp) {
-    var result = {
-        mins: timestamp.mins || 0,
-        secs: timestamp.secs || 0
-    };
-
-    if (result.secs) {
-        result.secs--;
-    } else if (result.mins) {
-        result.secs = 59;
-        result.mins--;
-    }
-
-    return result;
+    ctDown.text(duration.value);
 }
 
 function nextDurationType(durationType) {
@@ -44,67 +14,104 @@ function nextDurationType(durationType) {
    }
 }
 
+var Duration = function(description, value) {
+    this.description = description;
+    this.value = parseInt(value, 10);
+}
+
+Duration.prototype.increment = function() {
+    this.value++;
+    return this;
+};
+
+Duration.prototype.decrement = function() {
+    if (this.value > 0) {
+        this.value--;
+    }
+
+    return this;
+};
+
+var Timestamp = function(mins, secs) {
+    this.mins = mins || 0;
+    this.secs = secs || 0;
+}
+
+Timestamp.prototype.init = function(mins, secs) {
+    this.mins = mins || 0;
+    this.secs = secs || 0;
+
+    return this;
+};
+
+Timestamp.prototype.decrement = function() {
+    if (this.secs) {
+        this.secs--;
+    } else if (this.mins) {
+        this.secs = 59;
+        this.mins--;
+    }
+
+    return this;
+};
+
+Timestamp.prototype.toString = function() {
+    var str = this.mins + ":";
+    str += (this.secs < 10 ? '0' : '') + this.secs;
+
+    return str;
+};
+
+
 $(document).ready(function() {
   var countdownContainer = $('.countdown-container');
   var countdownType = countdownContainer.find('#countdownType');
   var countdown = countdownContainer.find('#countdown');
   var durationType = countdownContainer.data('duration-type');
-  var timestamp = toTimestamp(countdown.text());
+  var timestamp;
   var timerInterval;
 
-  var durations = {
-      break: 'Break',
-      session: 'Session'
-  };
+  var durations = {};
 
   $('.duration-input').each(function() {
     var widget = $(this);
     var valueElt = widget.find('.input-value');
+    var toggleContainer = widget.find('.toggle-container');
+    var dType = toggleContainer.data('duration-type');
+    var dText = toggleContainer.prev('.input-label').text();
 
-    widget.find('.minus-button').click(function(evt) {
-        var toggleContainer = $(this).closest('.toggle-container');
-        var dType = toggleContainer.data('duration-type');
+    durations[dType] = new Duration(dText, valueElt.text());
 
-        var value = parseInt(valueElt.text(), 10);
-        if (value > 0) {
-            value--;
-            valueElt.text(value);
+    widget.find('.minus-button, .plus-button').click(function(evt) {
+        var button = $(this);
+        var duration = durations[dType];
 
-            updateCountdown(toggleContainer, countdownContainer, value);
+        if (button.hasClass('minus-button')) {
+            duration.decrement();
+        } else {
+            duration.increment();
         }
+
+        valueElt.text(duration.value);
+        updateCountdown(toggleContainer, countdownContainer, duration);
 
         if (dType === durationType) {
             clearInterval(timerInterval);
-            timestamp = toTimestamp(countdown.text());
-        }
-
-        evt.preventDefault();
-    });
-
-    widget.find('.plus-button').click(function(evt) {
-        var toggleContainer = $(this).closest('.toggle-container');
-        var dType = toggleContainer.data('duration-type');
-
-        var value = parseInt(valueElt.text(), 10);
-        value++;
-        valueElt.text(value);
-
-        updateCountdown(toggleContainer, countdownContainer, value);
-        if (dType === durationType) {
-            clearInterval(timerInterval);
-            timestamp = toTimestamp(countdown.text());
+            timestamp.init(duration.value);
         }
 
         evt.preventDefault();
     });
   });
 
+  timestamp = new Timestamp(durations['session']);
+
   var updateClock = function(ts) {
-      countdown.text(toTimestampString(ts));
+      countdown.text(timestamp.toString());
   };
 
   var doClockTick = function() {
-      timestamp = decrementTimestamp(timestamp);
+      timestamp.decrement();
       updateClock(timestamp);
   };
 
@@ -112,9 +119,9 @@ $(document).ready(function() {
       durationType = nextDurationType(durationType);
       countdownContainer.data('duration-type', durationType);
       countdownContainer.attr('data-duration-type', durationType);
-      countdownType.text(durations[durationType]);
-      var value = $('.duration-input [data-duration-type=' + durationType + '] .input-value').text();
-      timestamp = toTimestamp(value);
+      var duration = durations[durationType];
+      countdownType.text(duration.description);
+      timestamp.init(duration.value);
   };
 
   countdownContainer.click(function() {

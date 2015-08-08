@@ -14,6 +14,10 @@ h1#countdown:hover {
   cursor: pointer;
 }
 
+h3 {
+  text-transform: uppercase;
+}
+
 span {
   color: white;
 }
